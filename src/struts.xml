@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+    <constant name="struts.ognl.allowStaticMethodAccess" value="true"/>
+    <constant name="struts.devMode" value="false"/>
+    <package name="default" extends="struts-default">
+        <global-results>
+            <result name="error">/error.jsp</result>
+        </global-results>
+        <global-exception-mappings>
+            <exception-mapping result="error"
+                               exception="java.lang.ArithmeticException"></exception-mapping>
+        </global-exception-mappings>
+        <action name="myAction" class="com.demo.Action.MyAction" method="save">
+            <result>/success.jsp</result>
+            <result name="input">/index1.jsp</result>
+        </action>
+
+
+        <action name="doLogin" class="action" method="LoginA">
+            <result name="error">error.jsp</result>
+            <result name="success">choose.jsp</result>
+        </action>
+        <action name="demo" class="demo" method="execute">
+            <result name="demo">main.jsp</result>
+        </action>
+        <action name="text" class="text" method="Test">
+        </action>
+
+        <action name="chooseaction" class="chooseaction" method="MapChoose">
+            <result name="1">index.jsp</result>
+            <result name="2">error.jsp</result>
+            <result name="3">success.jsp</result>
+            <result name="4">success.jsp</result>
+            <result name="5">success.jsp</result>
+            <result name="6">success.jsp</result>
+            <result name="7">success.jsp</result>
+            <result name="8">success.jsp</result>
+            <result name="9">success.jsp</result>
+            <result name="10">error.jsp</result>
+            <result name="11">index.jsp</result>
+            <result name="12">main.jsp</result>
+            <result name="13">index.jsp</result>
+            <result name="14">error.jsp</result>
+            <result name="15">error.jsp</result>
+            <result name="16">error.jsp</result>
+            <result name="17">main.jsp</result>
+            <result name="18">success.jsp</result>
+            <result name="19">main.jsp</result>
+            <result name="20">error.jsp</result>
+            <result name="21">success.jsp</result>
+            <result name="22">error.jsp</result>
+            <result name="23">success.jsp</result>
+            <result name="24">main.jsp</result>
+            <result name="25">success.jsp</result>
+            <result name="26">main.jsp</result>
+            <result name="27">error.jsp</result>
+            <result name="28">main.jsp</result>
+            <result name="29">success.jsp</result>
+            <result name="30">error.jsp</result>
+            <result name="31">main.jsp</result>
+            <result name="32">error.jsp</result>
+            <result name="33">success.jsp</result>
+            <result name="34">main.jsp</result>
+        </action>
+    </package>
+    <constant name="struts.i18n.encoding" value="UTF-8"/>
+</struts>

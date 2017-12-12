@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"
+       default-autowire="byName">
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close">
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/test?characterEncoding=utf-8&amp;useSSL=true"/>
+        <!-- 正式库 -->
+        <!--<value>jdbc:mysql://192.168.250.20:3306/zjuch_db</value>-->
+        <!-- 测试库 -->
+        <!--<value>jdbc:mysql://192.168.250.20:3306/zjuch_cs</value>-->
+        <!-- 开发库 -->
+        <!--<value>jdbc:mysql://127.0.0.1:3306/zjuch_db</value>-->
+        <!--<value>jdbc:mysql://127.0.0.1:3306/zjuchweb-local</value>-->
+        <property name="user" value="root"/>
+        <property name="password" value="123456"/>
+        <!--<value>cw#3io5c</value>-->
+        <!--<property name="maxPoolSize">-->
+        <!--<value>200</value>-->
+        <!--</property>-->
+        <!--<property name="minPoolSize">-->
+        <!--<value>20</value>-->
+        <!--</property>-->
+        <!--<property name="initialPoolSize">-->
+        <!--<value>1</value>-->
+        <!--</property>-->
+        <!--<property name="maxIdleTime">-->
+        <!--<value>60</value>-->
+        <!--</property>-->
+        <!--连接池中保留的最小连接数。-->
+        <property name="minPoolSize" value="10"/>
+        <!--连接池中保留的最大连接数。Default: 15 -->
+        <property name="maxPoolSize" value="100"/>
+        <!--最大空闲时间,1800秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
+        <property name="maxIdleTime" value="60"/>
+        <!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
+        <property name="acquireIncrement" value="3"/>
+        <property name="maxStatements" value="1000"/>
+        <property name="initialPoolSize" value="10"/>
+        <!--每60秒检查所有连接池中的空闲连接。Default: 0 -->
+        <property name="idleConnectionTestPeriod" value="30"/>
+        <!--定义在从数据库获取新连接失败后重复尝试的次数。Default: 30 -->
+        <property name="acquireRetryAttempts" value="30"/>
+        <property name="breakAfterAcquireFailure" value="true"/>
+        <property name="testConnectionOnCheckout" value="false"/>
+
+    </bean>
+    <bean id="hibernateTransactionManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <!-- 配置事务管理器 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!-- 配置事务通知 -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED" />
+            <tx:method name="select*" read-only="true"/>
+            <tx:method name="find*" read-only="true"/>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="query*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 配置aop -->
+    <aop:config proxy-target-class="true">
+        <aop:pointcut expression="execution(* com.demo.*Service*..*(..))" id="pointcut"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"/>
+    </aop:config>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource">
+            <ref bean="dataSource"/>
+        </property>
+        <property name="annotatedClasses">
+            <list>
+                <value>com.demo.Entity.Student</value>
+                <value>com.demo.Entity.Users</value>
+                <value>com.demo.Entity.Province</value>
+                <value>com.demo.Entity.Students</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <!--添加此句报异常：
+                在spring的类LocalSessionFactoryBean源码，
+                方法buildSessionFactory中将hibernate.current_session_context_class设为org.springframework.orm.hibernate5.SpringSessionContext
+                <prop key="hibernate.current_session_context_class">thread</prop>
+                 -->
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+                <prop key="hibernate.connection.url"><![CDATA[jdbc:mysql://127.0.0.1:3306/test?characterEncoding=utf-8&useSSL=true]]></prop>
+                <prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop>
+            </props>
+        </property>
+    </bean>
+    <!--service-->
+    <!---->
+    <bean id="loginServiceImp" class="com.demo.ServiceImp.LoginServiceImp">
+        <property name="loginImp">
+            <ref bean="loginImp"></ref>
+        </property>
+    </bean>
+    <!--用于和数据库进行交互-->
+    <bean id="loginImp" class="com.demo.DaoImp.LoginImp">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+    <bean id="chooseDaoImp" class="com.demo.DaoImp.ChooseDaoImp">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+    <bean id="chooseServiceImp" class="com.demo.ServiceImp.ChooseServiceImp">
+        <property name="chooseDaoImp">
+            <ref bean="chooseDaoImp"/>
+        </property>
+    </bean>
+    <bean id="chooseaction" class="com.demo.Action.ChooseAction" scope="prototype">
+        <property name="chooseServiceImp">
+            <ref bean="chooseServiceImp"/>
+        </property>
+    </bean>
+
+    <bean id="action" class="com.demo.Action.LoginAction" scope="prototype">
+        <property name="loginServiceImp">
+            <ref bean="loginServiceImp"></ref>
+        </property>
+    </bean>
+    <bean id="demo" class="com.demo.Action.DemoAction" scope="prototype">
+    </bean>
+    <bean id="text" class="com.demo.Action.AppAction" scope="prototype">
+    </bean>
+    <bean id="studentDaoImp" class="com.demo.DaoImp.StudentDaoImp" scope="prototype">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+    <bean id="studentServiceImp" class="com.demo.ServiceImp.StudentServiceImp" scope="prototype">
+        <property name="studentDaoImp">
+            <ref bean="studentDaoImp"/>
+        </property>
+    </bean>
+
+</beans>
